@@ -71,7 +71,7 @@ def prime_factorization(num):
     return factors[0], factors[1]
 
 
-def run():
+def attack():
     message = ""
     while True:
         try:
@@ -118,5 +118,5 @@ if msg_len:
     print("private => ", private_key)
 
 
-run()
+attack()
 # print(prime_factorization(3143658127))
