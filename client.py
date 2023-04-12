@@ -1,5 +1,6 @@
 import socket
 import threading
+import time
 import math
 import random
 
@@ -16,51 +17,15 @@ client.connect(ADDR)
 plain_text = ''
 public_key = 0
 n = 0
+encrypted_timers = []
 
-mapping = {
-    '0': 0,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    'a': 10,
-    'b': 11,
-    'c': 12,
-    'd': 13,
-    'e': 14,
-    'f': 15,
-    'g': 16,
-    'h': 17,
-    'i': 18,
-    'j': 19,
-    'k': 20,
-    'l': 21,
-    'm': 22,
-    'n': 23,
-    'o': 24,
-    'p': 25,
-    'q': 26,
-    'r': 27,
-    's': 28,
-    't': 29,
-    'u': 30,
-    'v': 31,
-    'w': 32,
-    'x': 33,
-    'y': 34,
-    'z': 35,
-    ' ': 36
-}
-inverse_mapping = {v: k for k, v in mapping.items()}
+mapping = {str(i): i for i in range(10)}
+mapping.update({chr(i + 97): i + 10 for i in range(26)})
+mapping[' '] = 36
 
 
 def encode(arrString):
-    encodedArr = []
+    encoded_text = []
     for string in arrString:
         sum = 0
         for i in range(0, 5):
@@ -68,8 +33,10 @@ def encode(arrString):
                 sum += int(mapping[string[i].lower()] * (37**(5 - i - 1)))
             else:
                 sum += int(mapping[' '] * (37**(5 - i - 1)))
-        encodedArr.append(int(sum))
-    return encodedArr
+        encoded_text.append(int(sum))
+    return encoded_text
+
+#!#########################################################################################
 
 
 def convert_string_to_blocks(string):
@@ -80,12 +47,16 @@ def convert_string_to_blocks(string):
     size = len(string)
     return [string[i:i+5] for i in range(0, size, 5)]
 
+#!#########################################################################################
+
 
 def ciphering(encoded_msg, n, e):
     cipher_text = []
     for num in encoded_msg:
         cipher_text.append(pow(num, e, n))
     return cipher_text
+
+#!#########################################################################################
 
 
 def send_to_server(msg):
@@ -100,6 +71,8 @@ def send_to_server(msg):
         send_len += b' '*(HEADER - len(send_len))
         client.send(send_len)
         client.send(MSG)
+
+#!#########################################################################################
 
 
 def read():
@@ -129,7 +102,11 @@ if msg_len:
 while True:
     plain_text = input("Enter a plain text: ")
     if plain_text != END_CONVERSATION:
+        # * calc elapsed time
+        start = time.time()
         send_to_server(plain_text)
+        end = time.time()
+        encrypted_timers.append(end-start)
     else:
         break
     thread = threading.Thread(target=read)

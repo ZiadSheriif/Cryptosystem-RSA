@@ -2,59 +2,23 @@ import socket
 import threading
 
 
-public = 0
+public_key = 0
 n = 0
 p = 0
 q = 0
 phi = 0
 
-mapping = {
-    '0': 0,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    'a': 10,
-    'b': 11,
-    'c': 12,
-    'd': 13,
-    'e': 14,
-    'f': 15,
-    'g': 16,
-    'h': 17,
-    'i': 18,
-    'j': 19,
-    'k': 20,
-    'l': 21,
-    'm': 22,
-    'n': 23,
-    'o': 24,
-    'p': 25,
-    'q': 26,
-    'r': 27,
-    's': 28,
-    't': 29,
-    'u': 30,
-    'v': 31,
-    'w': 32,
-    'x': 33,
-    'y': 34,
-    'z': 35,
-    ' ': 36
-}
-inverse_mapping = {v: k for k, v in mapping.items()}
+mapping = {str(i): i for i in range(10)}
+mapping.update({chr(i + 97): i + 10 for i in range(26)})
+mapping[' '] = 36
+pair_val = {v: k for k, v in mapping.items()}
 
 
 def init_socket():
-    global client, FORMAT, D, HEADER
+    global client, FORMAT, END_CONVERSATION, HEADER
     PORT = 5050
     FORMAT = "utf-8"
-    D = "DES"
+    END_CONVERSATION = "DES"
     HEADER = 64
     SERVER = socket.gethostbyname(socket.gethostname())
     # print(SERVER)
@@ -84,7 +48,7 @@ def map_each_char(encoded_msg):
         string = ''
         while number > 0:
             remainder = number % 37
-            char = inverse_mapping[remainder]
+            char = pair_val[remainder]
             string = char + string
             number //= 37
         mapped_chars.append(string)
@@ -92,7 +56,6 @@ def map_each_char(encoded_msg):
 
 # *calculate the value of phi, which is needed to calculate the private key
 # ? d=e^-1 mod phi(n)
-
 # ? phi(n)=(p-1)(q-1),but n=p*q
 
 
@@ -118,7 +81,7 @@ def run():
             if msg_len:
                 msg_len = int(msg_len)
                 msg = client.recv(msg_len).decode(FORMAT)
-                decrypted_msg = decrypt([int(msg)], n, d)
+                decrypted_msg = decrypt([int(msg)], n, private_key)
                 decoded_msg = map_each_char(decrypted_msg)
 
                 if (''.join(decoded_msg) != "endom"):
@@ -126,42 +89,39 @@ def run():
                         message += str(decoded_msg[i])
 
                 else:
-                    print("Decoded message : ", message)
+                    print("Message : ", message)
                     message = ""
         except Exception as e:
             print(f"Error: {e}")
-        # handle the error gracefully, e.g. by closing the connection
 
 
 init_socket()
 #! get public key
 msg_len = len(client.recv(HEADER).decode(FORMAT))
-# msg_len = False
 if msg_len:
     msg_len = int(msg_len)
     msg = client.recv(msg_len).decode(FORMAT)
-    public = int(msg)
-    print("Public key -> ", public)
+    public_key = int(msg)
+    print("Public key => ", public_key, flush=True)
 
 #! get n
 msg_len = len(client.recv(HEADER).decode(FORMAT))
-# msg_len = False
 if msg_len:
     msg_len = int(msg_len)
     msg = client.recv(msg_len).decode(FORMAT)
     n = int(msg)
-    print("n -> ", n)
+    print("N => ", n, flush=True)
     p, q = prime_factorization(n)
     phi = (p-1)*(q-1)
-    d = pow(public, -1, phi)
+    private_key = pow(public_key, -1, phi)
     print("p -> ", p)
     print("q -> ", q)
     print("phi -> ", phi)
-    print("private -> ", d)
+    print("private -> ", private_key)
 
 
 run()
-print(prime_factorization(35))
+# print(prime_factorization(35))
 
 # while True:
 # thread = threading.Thread(target=read)

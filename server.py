@@ -3,6 +3,9 @@ import threading
 import math
 import random
 import sys
+import time
+import matplotlib.pyplot as plt
+
 
 PORT = 5050
 FORMAT = "utf-8"
@@ -12,61 +15,26 @@ SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
+decrypted_timers = []
 
 
-mapping = {
-    '0': 0,
-    '1': 1,
-    '2': 2,
-    '3': 3,
-    '4': 4,
-    '5': 5,
-    '6': 6,
-    '7': 7,
-    '8': 8,
-    '9': 9,
-    'a': 10,
-    'b': 11,
-    'c': 12,
-    'd': 13,
-    'e': 14,
-    'f': 15,
-    'g': 16,
-    'h': 17,
-    'i': 18,
-    'j': 19,
-    'k': 20,
-    'l': 21,
-    'm': 22,
-    'n': 23,
-    'o': 24,
-    'p': 25,
-    'q': 26,
-    'r': 27,
-    's': 28,
-    't': 29,
-    'u': 30,
-    'v': 31,
-    'w': 32,
-    'x': 33,
-    'y': 34,
-    'z': 35,
-    ' ': 36,
-}
-inverse_mapping = {v: k for k, v in mapping.items()}
+mapping = {str(i): i for i in range(10)}
+mapping.update({chr(i + 97): i + 10 for i in range(26)})
+mapping[' '] = 36
+pair_val = {v: k for k, v in mapping.items()}
 
 
 def decode(encodedArr):
-    decodedArr = []
+    decoded_text = []
     for number in encodedArr:
         string = ''
         while number > 0:
             remainder = number % 37
-            char = inverse_mapping[remainder]
+            char = pair_val[remainder]
             string = char + string
             number //= 37
-        decodedArr.append(string)
-    return decodedArr
+        decoded_text.append(string)
+    return decoded_text
 
 
 #!#########################################################################################
@@ -146,8 +114,13 @@ def client(conn, addr, clients):
             if msg == END_CONVERSATION:
                 connected = False
 
+            # * calc elapsed time
+            start = time.time()
             decrypted_msg = decrypt([int(msg)], n, private_key)
             decoded_msg = decode(decrypted_msg)
+            end = time.time()
+            decrypted_timers.append(end - start)
+
             if (''.join(decoded_msg) != "endom"):
                 for i in range(0, len(decoded_msg)):
                     message += str(decoded_msg[i])
@@ -176,17 +149,27 @@ def start():
 
 
 #!#########################################################################################
-# `# num_of_bits //= 2` is dividing the value of `num_of_bits` by 2 and assigning the result back to
-# `num_of_bits`. This is likely being done to generate prime numbers of a certain size, as the size of
-# the primes needed for the RSA algorithm is typically half the size of the desired key length.
+def plotting(num_bits_list, times):
+    plt.plot(num_bits_list, times)
+    plt.xlabel('Number of bits')
+    plt.ylabel('Time (seconds)')
+    plt.title('Computation time vs. number of bits')
+    plt.show()
+
+
+#!#########################################################################################
+arr_bits = []
 num_of_bits = int(input("Enter size of bits: "))
+arr_bits.append(num_of_bits)
 num_of_bits //= 2
 p, q = generate_prime(num_of_bits)
-# p = 59
-# q = 79
+# p = 3752310557
+# q = 2742279847
 n = p*q
 phi = (p-1)*(q-1)
 public_key = generate_e(phi)
 private_key = pow(public_key, -1, phi)
 print("Server is starting", flush=True)
 start()
+
+plotting(arr_bits, decrypted_timers)

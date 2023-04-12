@@ -1,5 +1,6 @@
 import random
 
+
 def generate_prime(bits):
     while True:
         # Generate a random number of the specified number of bits
@@ -12,6 +13,7 @@ def generate_prime(bits):
         if is_prime(num):
             return num
 
+
 def is_prime(num):
     if num < 2:
         return False
@@ -19,4 +21,7 @@ def is_prime(num):
         if num % i == 0:
             return False
     return True
-print(generate_prime(32))
+
+
+# print(generate_prime(32))
+print(is_prime(3752310557))
