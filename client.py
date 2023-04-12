@@ -1,85 +1,140 @@
+import socket
+import threading
+import math
 import random
 
+PORT = 5050
+FORMAT = "utf-8"
+END_CONVERSATION = "DES"
+HEADER = 64
+SERVER = socket.gethostbyname(socket.gethostname())
+# print(SERVER)
+ADDR = (SERVER, PORT)
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(ADDR)
 
-def gcd(a, b):
-    if b == 0:
-        return a
+plain_text = ''
+public_key = 0
+n = 0
+
+mapping = {
+    '0': 0,
+    '1': 1,
+    '2': 2,
+    '3': 3,
+    '4': 4,
+    '5': 5,
+    '6': 6,
+    '7': 7,
+    '8': 8,
+    '9': 9,
+    'a': 10,
+    'b': 11,
+    'c': 12,
+    'd': 13,
+    'e': 14,
+    'f': 15,
+    'g': 16,
+    'h': 17,
+    'i': 18,
+    'j': 19,
+    'k': 20,
+    'l': 21,
+    'm': 22,
+    'n': 23,
+    'o': 24,
+    'p': 25,
+    'q': 26,
+    'r': 27,
+    's': 28,
+    't': 29,
+    'u': 30,
+    'v': 31,
+    'w': 32,
+    'x': 33,
+    'y': 34,
+    'z': 35,
+    ' ': 36
+}
+inverse_mapping = {v: k for k, v in mapping.items()}
+
+
+def encode(arrString):
+    encodedArr = []
+    for string in arrString:
+        sum = 0
+        for i in range(0, 5):
+            if string[i].lower() in mapping:
+                sum += int(mapping[string[i].lower()] * (37**(5 - i - 1)))
+            else:
+                sum += int(mapping[' '] * (37**(5 - i - 1)))
+        encodedArr.append(int(sum))
+    return encodedArr
+
+
+def convert_string_to_blocks(string):
+    size = len(string)
+    if (size % 5 != 0):
+        string += " " * (5 - (size % 5))
+    string += "endom"
+    size = len(string)
+    return [string[i:i+5] for i in range(0, size, 5)]
+
+
+def ciphering(encoded_msg, n, e):
+    cipher_text = []
+    for num in encoded_msg:
+        cipher_text.append(pow(num, e, n))
+    return cipher_text
+
+
+def send_to_server(msg):
+    converted_msg = convert_string_to_blocks(msg)
+    encoded_msg = encode(converted_msg)
+    cipher_text = ciphering(encoded_msg, n, public_key)
+
+    for char in cipher_text:
+        MSG = str(char).encode(FORMAT)
+        msg_len = len(MSG)
+        send_len = str(msg_len).encode(FORMAT)
+        send_len += b' '*(HEADER - len(send_len))
+        client.send(send_len)
+        client.send(MSG)
+
+
+def read():
+    try:
+        msg_len = len(client.recv(HEADER).decode(FORMAT))
+        if msg_len:
+            msg_len = int(msg_len)
+            msg = client.recv(msg_len).decode(FORMAT)
+    except Exception as e:
+        print(f"Error: {e}")
+
+
+msg_len = len(client.recv(HEADER).decode(FORMAT))
+if msg_len:
+    msg_len = int(msg_len)
+    msg = client.recv(msg_len).decode(FORMAT)
+    public_key = int(msg)
+    print("Public key => ", public_key, flush=True)
+
+
+msg_len = len(client.recv(HEADER).decode(FORMAT))
+if msg_len:
+    msg_len = int(msg_len)
+    msg = client.recv(msg_len).decode(FORMAT)
+    n = int(msg)
+    print("N => ", n, flush=True)
+while True:
+    plain_text = input("Enter a plain text: ")
+    if plain_text != END_CONVERSATION:
+        send_to_server(plain_text)
     else:
-        return gcd(b, a % b)
+        break
+    thread = threading.Thread(target=read)
+    thread.start()
 
 
-# Define a function to find the modular multiplicative inverse of a number a mod m
-# This is used to calculate the private key
-
-def mod_inverse(a, m):
-    for x in range(1, m):
-        if (a * x) % m == 1:
-            return x
-    return None
-
-# Define a function to generate the public and private keys given two large prime numbers p and q
-
-
-def generate_keypair(p, q):
-    # Calculate the modulus n
-    n = p * q
-    # Calculate Euler's totient function phi(n)
-    phi = (p-1) * (q-1)
-    # Choose a random integer e such that 1 < e < phi(n) and gcd(e, phi(n)) = 1
-    e = random.randint(1, phi)
-    g = gcd(e, phi)
-    while g != 1:
-        e = random.randint(1, phi)
-        g = gcd(e, phi)
-    # Calculate the modular multiplicative inverse of e mod phi(n)
-    # This is the private key
-    d = mod_inverse(e, phi)
-    # Return the public and private keys as tuples
-    return (n, e), (n, d)
-
-# Define a function to encrypt a plaintext message using the public key
-
-
-def encrypt(plaintext, public_key):
-    n, e = public_key
-    # Convert each character in the plaintext to its corresponding Unicode code point
-    # Raise each code point to the power of the public key exponent e, modulo the modulus n
-    # This produces a list of ciphertext values, each of which is an integer
-    ciphertext = [pow(ord(char), e, n) for char in plaintext]
-    # Return the ciphertext as a list of integers
-    return ciphertext
-
-# Define a function to decrypt a ciphertext message using the private key
-
-
-def decrypt(ciphertext, private_key):
-    n, d = private_key
-    # Raise each ciphertext value to the power of the private key exponent d, modulo the modulus n
-    # Convert each resulting value back to its corresponding Unicode character
-    # This produces a list of plaintext characters
-    plaintext = [chr(pow(char, d, n)) for char in ciphertext]
-    # Join the plaintext characters together into a single string
-    # Return the plaintext string
-    return ''.join(plaintext)
-
-
-# Choose two large prime numbers p and q
-p = 17
-q = 19
-
-# Generate the public and private keys
-public_key, private_key = generate_keypair(p, q)
-
-# Encrypt a plaintext message using the public key
-plaintext = "123456789"
-ciphertext = encrypt(plaintext, public_key)
-
-# Decrypt the ciphertext message using the private key
-decrypted_plaintext = decrypt(ciphertext, private_key)
-
-# Print the public key, private key, plaintext, ciphertext, and decrypted plaintext
-print("Public key:", public_key)
-print("Private key:", private_key)
-print("Plaintext:", plaintext)
-print("Ciphertext:", ciphertext)
-print("Decrypted plaintext:", decrypted_plaintext)
+#! to end conversation with server
+send_to_server(END_CONVERSATION)
