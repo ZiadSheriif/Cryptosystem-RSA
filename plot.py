@@ -56,10 +56,10 @@ def plotting(num_bits_list, times):
 num_bits_list = [8, 16, 32, 64, 128]
 timers = [0.0, 0.0, 0.0049855709075927734, 459.7955594062805, 10000]
 plotting(num_bits_list, timers)
-# for bits in num_bits_list:
-#     print(f"========== {bits} bits ==========\n")
-#     bits //= 2
-#     p, q = generate_prime(bits)
-#     n = p*q
-#     prime_factorization(n)
-#     print(f"===========================\n")
+for bits in num_bits_list:
+    print(f"========== {bits} bits ==========\n")
+    bits //= 2
+    p, q = generate_prime(bits)
+    n = p*q
+    prime_factorization(n)
+    print(f"===========================\n")

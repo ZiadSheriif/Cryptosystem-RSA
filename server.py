@@ -147,6 +147,7 @@ def start():
         thread = threading.Thread(target=client, args=(conn, addr, clients))
         thread.start()
 
+
 #!#########################################################################################
 arr_bits = []
 num_of_bits = int(input("Enter size of bits: "))
