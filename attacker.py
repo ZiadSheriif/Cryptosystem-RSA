@@ -1,6 +1,4 @@
 import socket
-import threading
-
 
 public_key = 0
 n = 0
@@ -114,24 +112,11 @@ if msg_len:
     p, q = prime_factorization(n)
     phi = (p-1)*(q-1)
     private_key = pow(public_key, -1, phi)
-    print("p -> ", p)
-    print("q -> ", q)
-    print("phi -> ", phi)
-    print("private -> ", private_key)
+    print("p => ", p)
+    print("q => ", q)
+    print("phi => ", phi)
+    print("private => ", private_key)
 
 
 run()
-# print(prime_factorization(35))
-
-# while True:
-# thread = threading.Thread(target=read)
-# thread.start()
-
-# encoded_msg = [36745, 39429, 4380, 31925, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429,
-#                31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429, 31925, 39429]
-
-# mapped_chars = map_each_char(encoded_msg)
-
-# decoded_message = ''.join(mapped_chars)
-
-# print(decoded_message)
+# print(prime_factorization(3143658127))

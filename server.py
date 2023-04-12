@@ -4,7 +4,6 @@ import math
 import random
 import sys
 import time
-import matplotlib.pyplot as plt
 
 
 PORT = 5050
@@ -119,7 +118,8 @@ def client(conn, addr, clients):
             decrypted_msg = decrypt([int(msg)], n, private_key)
             decoded_msg = decode(decrypted_msg)
             end = time.time()
-            decrypted_timers.append(end - start)
+            # decrypted_timers.append(end - start)
+            print(end - start)
 
             if (''.join(decoded_msg) != "endom"):
                 for i in range(0, len(decoded_msg)):
@@ -147,16 +147,6 @@ def start():
         thread = threading.Thread(target=client, args=(conn, addr, clients))
         thread.start()
 
-
-#!#########################################################################################
-def plotting(num_bits_list, times):
-    plt.plot(num_bits_list, times)
-    plt.xlabel('Number of bits')
-    plt.ylabel('Time (seconds)')
-    plt.title('Computation time vs. number of bits')
-    plt.show()
-
-
 #!#########################################################################################
 arr_bits = []
 num_of_bits = int(input("Enter size of bits: "))
@@ -171,5 +161,3 @@ public_key = generate_e(phi)
 private_key = pow(public_key, -1, phi)
 print("Server is starting", flush=True)
 start()
-
-plotting(arr_bits, decrypted_timers)

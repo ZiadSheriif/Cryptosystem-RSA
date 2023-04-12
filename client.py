@@ -1,8 +1,6 @@
 import socket
 import threading
 import time
-import math
-import random
 
 PORT = 5050
 FORMAT = "utf-8"
