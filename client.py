@@ -37,13 +37,13 @@ def encode(arrString):
 #!#########################################################################################
 
 
-def convert_string_to_blocks(string):
-    size = len(string)
+def convert_string_to_blocks(plain_text):
+    size = len(plain_text)
     if (size % 5 != 0):
-        string += " " * (5 - (size % 5))
-    string += "endom"
-    size = len(string)
-    return [string[i:i+5] for i in range(0, size, 5)]
+        plain_text += " " * (5 - (size % 5))
+    plain_text += "endom"
+    size = len(plain_text)
+    return [plain_text[i:i+5] for i in range(0, size, 5)]
 
 #!#########################################################################################
 
@@ -60,6 +60,7 @@ def ciphering(encoded_msg, n, e):
 def send_to_server(msg):
     converted_msg = convert_string_to_blocks(msg)
     encoded_msg = encode(converted_msg)
+    print(f"encoded message: %s" % encoded_msg)
     cipher_text = ciphering(encoded_msg, n, public_key)
 
     for char in cipher_text:

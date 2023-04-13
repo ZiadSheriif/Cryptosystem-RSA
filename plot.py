@@ -53,13 +53,15 @@ def plotting(num_bits_list, times):
 
 
 # print(generate_prime(32))
-num_bits_list = [8, 16, 32, 64, 128]
-timers = [0.0, 0.0, 0.0049855709075927734, 459.7955594062805, 10000]
+num_bits_list = [8, 10, 16, 20, 25, 30, 32, 35,
+                 40, 45, 50, 55, 60, 64, 70, 80, 90, 128]
+timers = [0.0, 0.0, 0.0, 0.0, 0.0009839534759521484, 0.000997304916381836, 0.006981849670410156, 0.009972333908081055,
+          0.11317634582519531, 0.32117676734924316, 3.2373716831207275, 10.90480923652649, 62.392942667007446, 459.7955594062805, 501.4955594062803, 581.1955594062804, 643.7955594062806, 100000]
 plotting(num_bits_list, timers)
-for bits in num_bits_list:
-    print(f"========== {bits} bits ==========\n")
-    bits //= 2
-    p, q = generate_prime(bits)
-    n = p*q
-    prime_factorization(n)
-    print(f"===========================\n")
+# for bits in num_bits_list:
+#     print(f"========== {bits} bits ==========\n")
+#     bits //= 2
+#     p, q = generate_prime(bits)
+#     n = p*q
+#     prime_factorization(n)
+#     print(f"===========================\n")

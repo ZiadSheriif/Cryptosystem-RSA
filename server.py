@@ -69,6 +69,8 @@ def generate_prime(bits):
 
         # Check if the number is prime
         if is_prime(num):
+            if len(primes) == 1 and primes[0] == num:
+                continue
             primes.append(num)
     return primes[0], primes[1]
 
@@ -94,7 +96,7 @@ def send_to_client(msg, client):
                       len(str(msg_len))) + str(msg_len).encode(FORMAT)
     client.send(send_len)
     client.send(MSG)
-    print("", flush=True)
+    print(flush=True)
 
 #!#########################################################################################
 
@@ -113,22 +115,18 @@ def client(conn, addr, clients):
             if msg == END_CONVERSATION:
                 connected = False
 
-            # * calc elapsed time
-            start = time.time()
+            # * decryption
             decrypted_msg = decrypt([int(msg)], n, private_key)
             decoded_msg = decode(decrypted_msg)
-            end = time.time()
-            # decrypted_timers.append(end - start)
-            print(end - start)
 
             if (''.join(decoded_msg) != "endom"):
                 for i in range(0, len(decoded_msg)):
                     message += str(decoded_msg[i])
             else:
-                print(message)
+                print(f"Message : {message}", flush=True)
                 message = ""
 
-            sys.stdout.flush()
+            # sys.stdout.flush()
             if client != conn:
                 send_to_client(msg, clients[-1])
     conn.close()
